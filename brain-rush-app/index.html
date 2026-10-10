@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brain Rush</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Brain Rush">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="icon" type="image/png" href="/favicon-48.png" style="color: green;">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<script>
+/* apply the saved theme before the page paints, so there is no flash */
+try { document.documentElement.setAttribute('data-theme', localStorage.getItem('br_theme') === 'light' ? 'light' : 'dark'); } catch (e) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* ---------- Themes ---------- */
+:root, html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #000; --panel: #0b0f0c; --panel2: #121a14; --field: #050805; --line: #1f2d23;
+  --text: #e8f5ec; --muted: #93a99a;
+  --g: #22c55e; --g-soft: #0b1d12; --g-line: #2c6b42;
+  --btn-bg: linear-gradient(135deg, #22c55e, #4ade80); --btn-text: #031a0a; --btn-shadow: 0 6px 18px rgba(34,197,94,.25);
+  --bad: #f87171; --bad-bg: #1a0b0b; --bad-line: #5b2323; --ok-bg: #07160d;
+  --shadow: none;
+  --glow: radial-gradient(900px 420px at 50% -120px, rgba(34,197,94,.22), transparent 70%), radial-gradient(520px 320px at 100% 100%, rgba(163,230,53,.08), transparent 70%);
+  --flame: #fb923c; --gold: #facc15; --silver: #cbd5e1; --bronze: #d6844a;
+}
+html[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f2fbf4; --panel: #ffffff; --panel2: #e9f7ed; --field: #f7fcf8; --line: #cde4d3;
+  --text: #0c1f12; --muted: #48664f;
+  --g: #15803d; --g-soft: #e1f5e7; --g-line: #7fc695;
+  --btn-bg: #15803d; --btn-text: #ffffff; --btn-shadow: 0 6px 16px rgba(21,128,61,.22);
+  --bad: #b91c1c; --bad-bg: #fef2f2; --bad-line: #fecaca; --ok-bg: #ecfdf3;
+  --shadow: 0 6px 22px rgba(21,128,61,.08);
+  --glow: radial-gradient(900px 420px at 50% -120px, rgba(34,197,94,.22), transparent 70%), radial-gradient(520px 320px at 100% 100%, rgba(132,204,22,.12), transparent 70%);
+  --flame: #ea580c; --gold: #ca8a04; --silver: #64748b; --bronze: #b45309;
+}
+
+/* ---------- Base ---------- */
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); font-family: 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 16px; line-height: 1.55; transition: background .25s, color .25s; }
+body::before { content: ''; position: fixed; inset: 0; z-index: -1; background: var(--glow); pointer-events: none; }
+main { max-width: 980px; margin: 0 auto; padding: 28px 20px 70px; }
+h1, h2, h3 { margin: 0; line-height: 1.15; letter-spacing: -0.01em; font-weight: 900; }
+h1 { font-size: 34px; }
+h2 { font-size: 21px; }
+h3 { font-size: 15px; color: var(--muted); font-weight: 800; margin-bottom: 12px; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.accent { color: var(--g); }
+button { font: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--g); outline-offset: 2px; }
+i.fa-solid, i.fa-regular { line-height: 1; }
+
+/* ---------- Top bar ---------- */
+.bar { position: sticky; top: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 20px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 22px; letter-spacing: -0.02em; }
+.logo { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 12px; background: var(--btn-bg); color: var(--btn-text); font-size: 19px; box-shadow: var(--btn-shadow); transform: rotate(-6deg); }
+.nav { display: flex; align-items: center; gap: 8px; }
+.who { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 14px; font-weight: 700; padding: 0 6px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- Buttons ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; background: var(--btn-bg); color: var(--btn-text); border: 1px solid transparent; padding: 12px 20px; border-radius: 12px; font-weight: 800; box-shadow: var(--btn-shadow); transition: transform .12s, filter .15s, background .15s, border-color .15s; }
+.btn:hover { filter: brightness(1.07); transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+.btn.alt { background: transparent; color: var(--g); border-color: var(--g-line); box-shadow: none; }
+.btn.alt:hover, .btn.alt.on { background: var(--g-soft); filter: none; border-color: var(--g); }
+.btn.ghost { background: transparent; color: var(--text); border-color: var(--line); box-shadow: none; }
+.btn.ghost:hover { background: var(--panel2); filter: none; border-color: var(--g-line); }
+.btn.sm { padding: 8px 13px; font-size: 14px; border-radius: 10px; }
+.btn.block { width: 100%; }
+.btn:disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ---------- Forms ---------- */
+label { display: block; margin-bottom: 14px; font-size: 14px; font-weight: 800; }
+.field { position: relative; display: block; margin-top: 6px; }
+.field > i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 15px; pointer-events: none; }
+input { display: block; width: 100%; padding: 12px 12px 12px 42px; background: var(--field); color: var(--text); border: 1.5px solid var(--line); border-radius: 12px; font: inherit; font-weight: 600; transition: border-color .15s, box-shadow .15s; }
+input:focus { outline: none; border-color: var(--g); box-shadow: 0 0 0 4px color-mix(in srgb, var(--g) 22%, transparent); }
+.field:focus-within > i { color: var(--g); }
+.msg { display: flex; align-items: flex-start; gap: 10px; padding: 11px 13px; border-radius: 12px; font-size: 14px; font-weight: 700; margin: 14px 0; border: 1px solid; }
+.msg::before { font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-top: 1px; }
+.msg.err { color: var(--bad); border-color: var(--bad-line); background: var(--bad-bg); }
+.msg.err::before { content: '\f071'; }
+.msg.ok { color: var(--g); border-color: var(--g-line); background: var(--ok-bg); }
+.msg.ok::before { content: '\f058'; }
+.msg:empty { display: none; }
+
+/* ---------- Cards ---------- */
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 22px; box-shadow: var(--shadow); }
+.ico { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 40px; height: 40px; border-radius: 12px; background: var(--g-soft); color: var(--g); font-size: 17px; }
+.chips { list-style: none; padding: 0; margin: 0; display: flex; gap: 10px; flex-wrap: wrap; }
+.chip { display: flex; align-items: center; gap: 10px; padding: 10px 14px 10px 10px; border: 1px solid var(--line); background: var(--panel); border-radius: 14px; box-shadow: var(--shadow); }
+.chip strong { display: block; font-size: 22px; line-height: 1.05; font-weight: 900; }
+.chip span.t { font-size: 12.5px; color: var(--muted); font-weight: 700; }
+.chip .ico.fire { color: var(--flame); }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.rise { animation: rise .45s both; animation-delay: calc(var(--i, 0) * 70ms); }
+
+/* ---------- Sign in page ---------- */
+.auth { display: grid; grid-template-columns: 1.1fr 1fr; gap: 44px; align-items: center; min-height: calc(100vh - 150px); }
+.hero-art { position: relative; width: 190px; height: 130px; margin-bottom: 14px; }
+.brain-big { position: absolute; left: 0; top: 8px; width: 110px; height: 110px; border-radius: 32px; background: var(--btn-bg); color: var(--btn-text); display: flex; align-items: center; justify-content: center; font-size: 56px; transform: rotate(-7deg); box-shadow: 0 14px 40px rgba(34,197,94,.35); animation: pulse 3s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: rotate(-3deg) scale(1.05); } }
+.floaty { position: absolute; color: var(--g); font-size: 22px; animation: bob 3.2s ease-in-out infinite; }
+.f1 { left: 124px; top: 0; }
+.f2 { left: 156px; top: 52px; color: var(--gold); animation-delay: -.8s; }
+.f3 { left: 118px; top: 92px; animation-delay: -1.6s; font-size: 20px; }
+.f4 { left: 4px; top: -6px; color: var(--flame); animation-delay: -2.2s; font-size: 18px; }
+@keyframes bob { 50% { transform: translateY(-9px) rotate(8deg); } }
+.hero h1 { font-size: 44px; }
+.hero > p { margin-top: 14px; color: var(--muted); max-width: 440px; font-size: 17px; font-weight: 600; }
+.hero .chips { margin-top: 26px; }
+.form-card h2 { margin-bottom: 4px; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: var(--field); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 20px; }
+.seg-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: transparent; border: none; color: var(--muted); padding: 10px; border-radius: 10px; font-weight: 800; transition: background .15s, color .15s; }
+.seg-btn.on { background: var(--btn-bg); color: var(--btn-text); }
+.seg-btn:not(.on):hover { color: var(--text); }
+.alt-actions { display: grid; gap: 10px; margin-top: 14px; }
+.narrow-card { max-width: 560px; margin: 20px auto; }
+.steps { margin: 0; padding-left: 20px; display: grid; gap: 10px; }
+.code { font-family: ui-monospace, Consolas, monospace; font-size: 13px; background: var(--field); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
+
+/* ---------- Home ---------- */
+.page-head { margin-bottom: 22px; }
+.page-head p { margin-top: 6px; font-weight: 600; }
+.split { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.cards { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.level-card { display: flex; flex-direction: column; gap: 14px; transition: transform .18s, border-color .18s; }
+.level-card:hover { transform: translateY(-4px); border-color: var(--g-line); }
+.level-top { display: flex; align-items: center; gap: 12px; }
+.level-top h2 { flex: 1; }
+.level-card .ico { width: 46px; height: 46px; font-size: 20px; }
+.meter { display: inline-flex; gap: 4px; }
+.meter i { width: 16px; height: 6px; border-radius: 3px; background: var(--line); }
+.meter i.on { background: var(--g); }
+.desc { color: var(--muted); font-size: 14px; font-weight: 600; }
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; font-size: 14px; margin: 0; padding-top: 14px; border-top: 1px dashed var(--line); align-items: center; }
+.facts dt { color: var(--muted); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.facts dt i { width: 16px; text-align: center; color: var(--g); }
+.facts dd { margin: 0; text-align: right; font-weight: 800; overflow-wrap: anywhere; }
+.level-card .btn { margin-top: auto; }
+.notice { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; border-color: var(--g-line); margin-bottom: 16px; }
+.notice p { color: var(--muted); font-size: 14px; margin-top: 2px; }
+.tip { display: flex; align-items: center; gap: 10px; margin-top: 18px; color: var(--muted); font-size: 14px; font-weight: 600; }
+.tip i { color: var(--gold); }
+
+/* ---------- Quiz ---------- */
+.quiz-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+.pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border: 1px solid var(--g-line); background: var(--g-soft); color: var(--g); border-radius: 999px; font-size: 14px; font-weight: 800; }
+.timerbox { display: inline-flex; align-items: center; gap: 10px; padding: 7px 16px; border: 1px solid var(--g-line); border-radius: 14px; background: var(--panel); color: var(--g); font-size: 22px; font-weight: 900; font-variant-numeric: tabular-nums; }
+.timerbox i { font-size: 18px; }
+.timerbox.low { color: var(--bad); border-color: var(--bad-line); animation: blink 1s steps(2, start) infinite; }
+@keyframes blink { 50% { opacity: .5; } }
+.progress { height: 12px; background: var(--line); border-radius: 999px; overflow: hidden; }
+.fill { height: 100%; background: var(--btn-bg); border-radius: 999px; transition: width .3s; }
+.progress-text { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); font-weight: 700; margin: 8px 0 18px; }
+.q { font-size: 23px; font-weight: 800; margin-bottom: 16px; }
+.opt { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; background: var(--field); color: var(--text); border: 1.5px solid var(--line); padding: 13px 14px; margin-top: 10px; border-radius: 14px; font-weight: 700; transition: border-color .15s, background .15s, transform .12s; }
+.opt:hover { border-color: var(--g-line); background: var(--panel2); transform: translateX(3px); }
+.opt .key { flex: none; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border: 1.5px solid var(--line); border-radius: 9px; font-size: 13px; font-weight: 900; color: var(--muted); }
+.opt .txt { flex: 1; }
+.opt .tick { display: none; color: var(--g); font-size: 18px; }
+.opt.sel { border-color: var(--g); background: var(--g-soft); animation: pop .22s; }
+.opt.sel .key { background: var(--btn-bg); border-color: transparent; color: var(--btn-text); }
+.opt.sel .tick { display: inline; }
+@keyframes pop { 50% { transform: scale(1.015); } }
+.quiz-actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0 22px; }
+.quiz-actions .spacer { flex: 1; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 8px; }
+.grid button { background: var(--field); color: var(--muted); border: 1.5px solid var(--line); padding: 8px 0; border-radius: 10px; font-weight: 800; font-size: 14px; transition: border-color .15s, transform .12s; }
+.grid button:hover { border-color: var(--g-line); transform: translateY(-2px); }
+.grid button.done { border-color: var(--g-line); color: var(--g); background: var(--g-soft); }
+.grid button.cur { background: var(--btn-bg); color: var(--btn-text); border-color: transparent; }
+
+/* ---------- Results ---------- */
+.result-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.score { display: flex; align-items: baseline; gap: 12px; font-size: 68px; font-weight: 900; color: var(--g); line-height: 1; margin: 18px 0 8px; letter-spacing: -0.03em; }
+.score i { font-size: 40px; color: var(--gold); align-self: center; }
+.score small { font-size: 26px; color: var(--muted); font-weight: 800; }
+.statrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 20px 0; }
+.statrow > div { display: flex; align-items: center; gap: 12px; border: 1px solid var(--line); background: var(--field); border-radius: 14px; padding: 12px 14px; }
+.statrow strong { display: block; font-size: 21px; line-height: 1.1; font-weight: 900; }
+.statrow span.t { font-size: 13px; color: var(--muted); font-weight: 700; }
+.rev { padding: 12px 14px; margin-top: 10px; border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 12px; font-size: 14px; background: var(--field); font-weight: 600; }
+.rev.ok { border-left-color: var(--g); }
+.rev.no { border-left-color: var(--bad); }
+.rev strong { display: block; margin-bottom: 4px; font-weight: 800; }
+.good { color: var(--g); }
+.bad { color: var(--bad); }
+.confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 20; }
+.conf { position: absolute; top: -24px; animation: fall 2.4s ease-in forwards; }
+@keyframes fall { to { transform: translateY(112vh) rotate(540deg); opacity: .85; } }
+
+/* ---------- Leaderboard ---------- */
+.row-tabs { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+.tabs { display: inline-grid; grid-auto-flow: column; gap: 4px; padding: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
+.tabs .seg-btn { padding: 8px 14px; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+th, td { text-align: left; padding: 13px 10px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-size: 13px; font-weight: 800; }
+tbody tr:last-child td { border-bottom: none; }
+td.name { overflow-wrap: anywhere; font-weight: 800; }
+tr.me td { background: var(--g-soft); }
+.rank { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 32px; border-radius: 10px; font-weight: 900; font-size: 14px; border: 1px solid var(--line); color: var(--muted); }
+.rank.r1 { color: var(--gold); border-color: var(--gold); background: color-mix(in srgb, var(--gold) 14%, transparent); font-size: 16px; }
+.rank.r2 { color: var(--silver); border-color: var(--silver); background: color-mix(in srgb, var(--silver) 14%, transparent); font-size: 16px; }
+.rank.r3 { color: var(--bronze); border-color: var(--bronze); background: color-mix(in srgb, var(--bronze) 14%, transparent); font-size: 16px; }
+.streak { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; }
+.streak i { color: var(--flame); }
+.streak.off i { color: var(--muted); }
+.empty { text-align: center; color: var(--muted); padding: 34px 10px; font-weight: 700; }
+.empty i { display: block; font-size: 34px; margin-bottom: 10px; color: var(--g); }
+
+/* ---------- Offline bar and install card ---------- */
+.netbar { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 9px 14px; background: var(--g-soft); color: var(--g); border-bottom: 1px solid var(--g-line); font-size: 14px; font-weight: 800; text-align: center; }
+.netbar[hidden] { display: none; }
+.install { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 18px; }
+.install > div { flex: 1; min-width: 200px; }
+.install h3 { margin: 0 0 2px; color: var(--text); font-size: 17px; }
+.install p { font-size: 14px; }
+
+/* ---------- Confirm dialog ---------- */
+#dlg { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: flex; align-items: center; justify-content: center; z-index: 30; padding: 16px; }
+.dlgbox { background: var(--panel); border: 1px solid var(--g-line); border-radius: 18px; padding: 24px; max-width: 360px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.4); animation: pop .2s; }
+.dlgbox .ico { width: 52px; height: 52px; font-size: 22px; margin-bottom: 12px; }
+.dlgbox p { margin-bottom: 18px; font-weight: 700; }
+.dlgbox .actions { justify-content: center; }
+
+@media (max-width: 760px) {
+  .auth { grid-template-columns: 1fr; gap: 26px; min-height: 0; }
+  .hero h1 { font-size: 32px; }
+  h1 { font-size: 27px; }
+  .bar { padding: 9px 12px; }
+  .lbl { display: none; }
+  .nav .btn.sm { padding: 9px 12px; }
+  .q { font-size: 19px; }
+  .score { font-size: 54px; }
+  .tabs .seg-btn { padding: 8px 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<header id="topbar"></header>
+<div id="netbar" class="netbar" role="status" hidden></div>
+<main id="app"></main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* Your Supabase details (the publishable key is meant to be public) */
+const SUPABASE_URL = 'https://cxdpdwbtxhlohidjtaxh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_lJ-cE52lPUZUG6Mp7TfvAg_p1frzcbM';
+
+/* ---------- Questions: [question, correct answer, wrong, wrong, wrong] ---------- */
+const BANK = {
+  easy: [
+    ["What is the capital of France?","Paris","Rome","Madrid","Berlin"],
+    ["How many days are in a week?","7","5","6","8"],
+    ["What color is the sky on a clear day?","Blue","Green","Red","Yellow"],
+    ["Which planet is known as the Red Planet?","Mars","Venus","Jupiter","Mercury"],
+    ["What is 5 + 7?","12","11","13","10"],
+    ["How many continents are there?","7","5","6","8"],
+    ["Which animal says 'meow'?","Cat","Dog","Cow","Duck"],
+    ["Which is the largest ocean?","Pacific Ocean","Atlantic Ocean","Indian Ocean","Arctic Ocean"],
+    ["How many sides does a triangle have?","3","4","5","2"],
+    ["At what temperature does water freeze (°C)?","0","10","32","100"],
+    ["Which fruit is yellow and curved?","Banana","Apple","Grape","Orange"],
+    ["How many months are in a year?","12","10","11","13"],
+    ["What is the opposite of hot?","Cold","Warm","Wet","Dry"],
+    ["Which gas do humans need to breathe to live?","Oxygen","Helium","Nitrogen","Hydrogen"],
+    ["What is 10 × 10?","100","10","110","1000"],
+    ["Which is the fastest land animal?","Cheetah","Horse","Lion","Rabbit"],
+    ["Which star is closest to Earth?","The Sun","Sirius","Polaris","Alpha Centauri"],
+    ["How many hours are in a day?","24","12","48","60"],
+    ["What do bees make?","Honey","Milk","Silk","Butter"],
+    ["What is the capital of England?","London","Manchester","Liverpool","Dublin"],
+    ["What is 15 − 6?","9","8","10","11"],
+    ["Which shape has four equal sides?","Square","Triangle","Circle","Oval"],
+    ["Which season comes after winter?","Spring","Summer","Autumn","Monsoon"],
+    ["Which organ pumps blood around the body?","Heart","Lungs","Liver","Stomach"],
+    ["What is the largest animal on Earth?","Blue whale","Elephant","Giraffe","Shark"],
+    ["What color do you get by mixing blue and yellow?","Green","Purple","Orange","Brown"],
+    ["Which country is famous for the pyramids of Giza?","Egypt","Mexico","India","Greece"],
+    ["How many legs does a spider have?","8","6","10","4"],
+    ["What is the first letter of the English alphabet?","A","B","Z","C"],
+    ["On which planet do we live?","Earth","Mars","Venus","Saturn"],
+    ["Which of these is a mammal?","Dolphin","Shark","Trout","Eel"],
+    ["What is 100 ÷ 4?","25","20","30","40"],
+    ["Which day comes after Monday?","Tuesday","Sunday","Wednesday","Friday"],
+    ["Which device is used to tell the time?","Clock","Compass","Ruler","Thermometer"],
+    ["What is the capital of Japan?","Tokyo","Beijing","Seoul","Bangkok"],
+    ["Ice is the solid form of what?","Water","Salt","Sugar","Oil"],
+    ["How many minutes are in an hour?","60","30","100","24"],
+    ["Which animal is called the king of the jungle?","Lion","Tiger","Elephant","Bear"],
+    ["How many wheels does a bicycle have?","2","3","4","1"],
+    ["Which is the biggest planet in our solar system?","Jupiter","Saturn","Earth","Neptune"]
+  ],
+  medium: [
+    ["What is the chemical symbol for gold?","Au","Ag","Gd","Go"],
+    ["Who wrote 'Romeo and Juliet'?","William Shakespeare","Charles Dickens","Mark Twain","Jane Austen"],
+    ["What is the capital of Australia?","Canberra","Sydney","Melbourne","Perth"],
+    ["What is the square root of 144?","12","14","11","16"],
+    ["What is the hardest natural substance?","Diamond","Gold","Iron","Quartz"],
+    ["Which planet is best known for its rings?","Saturn","Mars","Mercury","Earth"],
+    ["In which year did World War II end?","1945","1939","1918","1950"],
+    ["Which is the longest river in Africa?","The Nile","The Congo","The Niger","The Zambezi"],
+    ["Who painted the Mona Lisa?","Leonardo da Vinci","Michelangelo","Vincent van Gogh","Pablo Picasso"],
+    ["What is the capital of Canada?","Ottawa","Toronto","Vancouver","Montreal"],
+    ["What is the chemical formula of water?","H2O","CO2","O2","NaCl"],
+    ["How many bones does an adult human body have?","206","201","212","300"],
+    ["What is the currency of Japan?","Yen","Won","Yuan","Dollar"],
+    ["Who developed the theory of relativity?","Albert Einstein","Isaac Newton","Nikola Tesla","Galileo Galilei"],
+    ["What is the smallest prime number?","2","1","3","0"],
+    ["Which gas makes up most of Earth's atmosphere?","Nitrogen","Oxygen","Carbon dioxide","Argon"],
+    ["Which ocean lies between Africa and Australia?","Indian Ocean","Atlantic Ocean","Pacific Ocean","Arctic Ocean"],
+    ["Who was the first person to walk on the Moon?","Neil Armstrong","Buzz Aldrin","Yuri Gagarin","Michael Collins"],
+    ["Which is the largest hot desert in the world?","Sahara","Gobi","Kalahari","Arabian"],
+    ["Which language has the most native speakers?","Mandarin Chinese","English","Spanish","Hindi"],
+    ["In which country is Machu Picchu?","Peru","Mexico","Chile","Bolivia"],
+    ["Which part of the cell is called the powerhouse?","Mitochondria","Nucleus","Ribosome","Membrane"],
+    ["What is 15% of 200?","30","15","25","35"],
+    ["Who wrote the novel '1984'?","George Orwell","Aldous Huxley","Ray Bradbury","H. G. Wells"],
+    ["At what temperature does water boil in Fahrenheit?","212°F","100°F","180°F","250°F"],
+    ["Which element has atomic number 1?","Hydrogen","Helium","Oxygen","Carbon"],
+    ["What is the capital of Brazil?","Brasília","Rio de Janeiro","São Paulo","Buenos Aires"],
+    ["How many players per side are on the pitch in a football (soccer) match?","11","9","10","12"],
+    ["Which blood type is the universal donor for red blood cells?","O negative","AB positive","A positive","B negative"],
+    ["What does HTML stand for?","HyperText Markup Language","High Text Machine Language","Hyperlinks and Text Markup Language","Home Tool Markup Language"],
+    ["Which planet is closest to the Sun?","Mercury","Venus","Earth","Mars"],
+    ["Who discovered penicillin?","Alexander Fleming","Louis Pasteur","Marie Curie","Edward Jenner"],
+    ["Which country gave the Statue of Liberty to the United States?","France","England","Spain","Italy"],
+    ["What is the largest land mammal?","African elephant","Rhinoceros","Hippopotamus","Giraffe"],
+    ["What is 50 in Roman numerals?","L","C","X","D"],
+    ["Which is the longest bone in the human body?","Femur","Tibia","Humerus","Spine"],
+    ["In which country is the city of Marrakech?","Morocco","Egypt","Tunisia","Turkey"],
+    ["How many sides does a hexagon have?","6","5","7","8"],
+    ["Who is often called the father of the computer?","Charles Babbage","Alan Turing","Bill Gates","Steve Jobs"],
+    ["In which country is the Great Wall located?","China","Japan","India","Mongolia"]
+  ],
+  advanced: [
+    ["Approximately how fast does light travel in a vacuum?","300,000 km/s","150,000 km/s","30,000 km/s","3,000,000 km/s"],
+    ["Who wrote 'The Brothers Karamazov'?","Fyodor Dostoevsky","Leo Tolstoy","Anton Chekhov","Ivan Turgenev"],
+    ["What is the derivative of sin(x)?","cos(x)","-cos(x)","-sin(x)","tan(x)"],
+    ["In which year did the Berlin Wall fall?","1989","1991","1985","1979"],
+    ["What is the chemical symbol for tungsten?","W","T","Tu","Tn"],
+    ["Which physicist formulated the uncertainty principle?","Werner Heisenberg","Niels Bohr","Max Planck","Erwin Schrödinger"],
+    ["What is the capital of Kazakhstan?","Astana","Almaty","Tashkent","Bishkek"],
+    ["Which treaty formally ended World War I with Germany?","Treaty of Versailles","Treaty of Paris","Treaty of Utrecht","Treaty of Tordesillas"],
+    ["Which particle carries the electromagnetic force?","Photon","Gluon","Neutrino","Electron"],
+    ["What is the largest moon of Saturn?","Titan","Europa","Ganymede","Enceladus"],
+    ["Which algorithm runs in O(log n) time on a sorted array?","Binary search","Linear search","Bubble sort","Merge sort"],
+    ["Who painted 'Guernica'?","Pablo Picasso","Salvador Dalí","Joan Miró","Diego Velázquez"],
+    ["Which element has the highest electronegativity?","Fluorine","Oxygen","Chlorine","Nitrogen"],
+    ["In which year was the Magna Carta sealed?","1215","1066","1315","1415"],
+    ["Which data structure follows last-in, first-out (LIFO)?","Stack","Queue","Heap","Linked list"],
+    ["Who composed 'The Four Seasons'?","Antonio Vivaldi","Johann Sebastian Bach","Wolfgang Amadeus Mozart","Ludwig van Beethoven"],
+    ["Which is the smallest country in the world by area?","Vatican City","Monaco","San Marino","Liechtenstein"],
+    ["Which river flows through Baghdad?","Tigris","Euphrates","Jordan","Nile"],
+    ["Which vitamin does the skin produce when exposed to sunlight?","Vitamin D","Vitamin C","Vitamin A","Vitamin K"],
+    ["Who formulated the three laws of planetary motion?","Johannes Kepler","Galileo Galilei","Isaac Newton","Tycho Brahe"],
+    ["What is 2 to the power of 10?","1024","512","2048","1000"],
+    ["Which empire did Genghis Khan found?","Mongol Empire","Ottoman Empire","Persian Empire","Roman Empire"],
+    ["What is the sum of the interior angles of a pentagon?","540°","360°","720°","450°"],
+    ["Which planet in our solar system has the shortest day?","Jupiter","Mercury","Earth","Mars"],
+    ["Who wrote 'One Hundred Years of Solitude'?","Gabriel García Márquez","Jorge Luis Borges","Pablo Neruda","Isabel Allende"],
+    ["Which gas is most abundant in the atmosphere of Mars?","Carbon dioxide","Nitrogen","Oxygen","Methane"],
+    ["Who was the first emperor of Rome?","Augustus","Julius Caesar","Nero","Constantine"],
+    ["Who discovered the electron in 1897?","J. J. Thomson","Ernest Rutherford","James Chadwick","Robert Millikan"],
+    ["What is the capital of Switzerland?","Bern","Zurich","Geneva","Basel"],
+    ["What is the SI unit of electrical resistance?","Ohm","Volt","Ampere","Watt"],
+    ["What is the decimal number 10 in binary?","1010","1001","1100","1110"],
+    ["Which 1815 battle ended Napoleon's rule as emperor?","Waterloo","Austerlitz","Trafalgar","Borodino"],
+    ["Which is the deepest known ocean trench?","Mariana Trench","Tonga Trench","Java Trench","Puerto Rico Trench"],
+    ["Who published the heliocentric model in 1543?","Nicolaus Copernicus","Johannes Kepler","Galileo Galilei","Ptolemy"],
+    ["Which protocol is used to securely browse websites?","HTTPS","FTP","SMTP","Telnet"],
+    ["Who wrote 'The Wealth of Nations'?","Adam Smith","Karl Marx","John Maynard Keynes","David Ricardo"],
+    ["Which enzyme unwinds the DNA double helix during replication?","Helicase","Ligase","Polymerase","Amylase"],
+    ["Which country spans the most time zones, counting overseas territories?","France","Russia","United States","China"],
+    ["What is the value of e^(iπ) + 1?","0","1","-1","i"],
+    ["Who proved Fermat's Last Theorem in the 1990s?","Andrew Wiles","Pierre de Fermat","Carl Gauss","Leonhard Euler"]
+  ]
+};
+
+
+
+/* ---------- Setup ---------- */
+const LEVELS = ['easy', 'medium', 'advanced'];
+const LABEL = { easy: 'Easy', medium: 'Medium', advanced: 'Advanced' };
+const LVL_ICON = { easy: 'seedling', medium: 'bolt', advanced: 'rocket' };
+const TOTAL = 40;
+const LIMIT = 20 * 60; // seconds
+const PER = { easy: 10, medium: 20, advanced: 30 }; // points per correct answer
+
+const app = document.getElementById('app');
+const topbar = document.getElementById('topbar');
+
+/* localStorage holds only the quiz in progress, your last result and unsent scores */
+const mem = {};
+const db = {
+  get(k, d) {
+    try {
+      const v = localStorage.getItem(k);
+      if (v !== null) return JSON.parse(v);
+    } catch (e) {}
+    return k in mem ? mem[k] : d;
+  },
+  set(k, v) {
+    mem[k] = v;
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
+  },
+  del(k) {
+    delete mem[k];
+    try { localStorage.removeItem(k); } catch (e) {}
+  }
+};
+
+let sb = null;          // Supabase client
+let user = null;        // username shown on the leaderboard
+let uid = null;         // account id
+let Q = null;           // quiz in progress
+let timerId = null;
+let onSubmit = null;
+let pendingYes = null;
+let recovering = false; // true while the person is resetting a password
+let boardToken = 0;
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const ic = n => '<i class="fa-solid fa-' + n + '" aria-hidden="true"></i>';
+const fmt = sec => String(Math.floor(sec / 60)).padStart(2, '0') + ':' + String(sec % 60).padStart(2, '0');
+const fmtLong = sec => Math.floor(sec / 60) + 'm ' + String(sec % 60).padStart(2, '0') + 's';
+const setText = (id, t) => { const e = document.getElementById(id); if (e) e.textContent = t; };
+const reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const localDay = () => {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+};
+
+function rnd(n) {
+  try { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; }
+  catch (e) { return Math.floor(Math.random() * n); }
+}
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = rnd(i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ---------- Theme (dark / light) ---------- */
+const theme = () => document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+function themeButton() {
+  const light = theme() === 'light';
+  return '<button class="btn ghost sm" data-theme-toggle="1" aria-label="' + (light ? 'Switch to dark mode' : 'Switch to light mode') + '">' +
+    ic(light ? 'moon' : 'sun') + '<span class="lbl">' + (light ? 'Dark' : 'Light') + '</span></button>';
+}
+function toggleTheme() {
+  const next = theme() === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('br_theme', next); } catch (e) {}
+  const old = topbar.querySelector('[data-theme-toggle]');
+  if (old) old.outerHTML = themeButton();
+}
+
+/* ---------- Navigation ---------- */
+function renderNav(cur) {
+  const item = (go, icon, label) => '<button class="btn alt sm' + (cur === go ? ' on' : '') + '" data-go="' + go + '" aria-label="' + label + '">' + ic(icon) + '<span class="lbl">' + label + '</span></button>';
+  topbar.innerHTML = '<div class="bar"><div class="brand"><span class="logo" aria-hidden="true"><i class="fa-solid fa-brain"></i></span>Brain Rush</div>' +
+    '<nav class="nav">' +
+    (user ? item('home', 'house', 'Home') + item('board', 'trophy', 'Leaderboard') + '<span class="who">' + ic('user') + esc(user) + '</span>' : '') +
+    themeButton() +
+    (user ? '<button class="btn ghost sm" data-go="logout" aria-label="Log out">' + ic('right-from-bracket') + '<span class="lbl">Log out</span></button>' : '') +
+    '</nav></div>';
+}
+
+function route() {
+  clearInterval(timerId);
+  renderNav();
+  if (!user) return renderAuth('login');
+  if (db.get('br_quiz_' + uid, null)) return renderQuiz();
+  renderHome();
+}
+
+async function doLogout() {
+  clearInterval(timerId);
+  try { if (sb) await sb.auth.signOut(); } catch (err) {}
+  db.del('br_last');
+  user = null; uid = null; Q = null;
+  route();
+}
+
+topbar.addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  if (b.dataset.themeToggle) return toggleTheme();
+  clearInterval(timerId);
+  if (b.dataset.go === 'home') renderHome();
+  if (b.dataset.go === 'board') renderBoard('easy');
+  if (b.dataset.go === 'logout') doLogout();
+});
+
+/* ---------- Setup screen (only shown if the Supabase values are missing) ---------- */
+function renderSetup(problem) {
+  app.innerHTML = '<div class="card narrow-card"><h1>' + ic('gear') + ' Almost there</h1>' +
+    (problem ? '<p class="msg err">' + esc(problem) + '</p>' : '') +
+    '<p class="muted" style="margin:12px 0">Brain Rush needs a free Supabase project so scores and accounts are shared between everyone who plays.</p>' +
+    '<ol class="steps"><li>Create a project at supabase.com.</li>' +
+    '<li>Open <strong>SQL Editor</strong>, paste the contents of <span class="code">supabase-setup.sql</span> and press <strong>Run</strong>.</li>' +
+    '<li>Open <strong>Settings, then API Keys</strong>. Copy the <strong>Project URL</strong> and the <strong>Publishable key</strong>.</li>' +
+    '<li>Paste them into <span class="code">SUPABASE_URL</span> and <span class="code">SUPABASE_KEY</span> near the top of the script in this file.</li>' +
+    '<li>Save the file and refresh this page.</li></ol></div>';
+}
+
+/* ---------- Auth ---------- */
+const val = n => { const i = document.querySelector('#f [name="' + n + '"]'); return i ? i.value : ''; };
+
+function setMsg(text, ok) {
+  const m = document.getElementById('msg');
+  if (!m) return;
+  m.textContent = text || '';
+  m.className = 'msg ' + (ok ? 'ok' : 'err');
+}
+
+function busy(on) {
+  document.querySelectorAll('#f button').forEach(b => { b.disabled = on; });
+}
+
+function friendly(err) {
+  const m = (err && err.message) || 'Something went wrong. Try again.';
+  if (/invalid login/i.test(m)) return 'Wrong email or password.';
+  if (/not confirmed/i.test(m)) return 'Confirm your email first. Check your inbox for the link.';
+  if (/already registered/i.test(m)) return 'That email already has an account. Log in instead.';
+  if (/rate limit|too many|security purposes/i.test(m)) return 'Too many attempts. Wait a minute and try again.';
+  if (/database error saving new user/i.test(m)) return 'That username was just taken. Try another one.';
+  if (/failed to fetch|network/i.test(m)) return 'Could not reach the server. Check your internet connection.';
+  return m;
+}
+
+const field = (label, icon, name, type, ac) =>
+  '<label>' + label + '<span class="field">' + ic(icon) + '<input name="' + name + '" type="' + (type || 'text') + '" autocomplete="' + (ac || 'off') + '"></span></label>';
+
+function authShell(tab, inner) {
+  const seg = tab
+    ? '<div class="seg"><button type="button" class="seg-btn' + (tab === 'login' ? ' on' : '') + '" data-auth="login">' + ic('right-to-bracket') + 'Log in</button>' +
+      '<button type="button" class="seg-btn' + (tab === 'signup' ? ' on' : '') + '" data-auth="signup">' + ic('user-plus') + 'Sign up</button></div>'
+    : '';
+  const chip = (icon, n, t) => '<li class="chip"><span class="ico">' + ic(icon) + '</span><div><strong>' + n + '</strong><span class="t">' + t + '</span></div></li>';
+  app.innerHTML = '<div class="auth"><section class="hero rise"><div class="hero-art" aria-hidden="true"><span class="brain-big"><i class="fa-solid fa-brain"></i></span>' +
+    '<i class="fa-solid fa-bolt floaty f1"></i><i class="fa-solid fa-star floaty f2"></i><i class="fa-solid fa-lightbulb floaty f3"></i><i class="fa-solid fa-puzzle-piece floaty f4"></i></div>' +
+    '<h1>Train your brain.<br><span class="accent">Beat the clock.</span></h1>' +
+    '<p>Pick a level, answer 40 questions in 20 minutes and see where you rank against players everywhere.</p>' +
+    '<ul class="chips">' + chip('layer-group', '3', 'levels') + chip('circle-question', '40', 'questions each') + chip('stopwatch', '20', 'minute timer') + '</ul></section>' +
+    '<section class="card form-card rise" style="--i:2">' + seg + inner + '</section></div>';
+}
+
+function renderAuth(mode, note) {
+  clearInterval(timerId);
+  renderNav('');
+  onSubmit = null;
+  const msg = '<p id="msg" class="msg ' + (note && note.ok ? 'ok' : 'err') + '" role="alert">' + (note ? esc(note.t) : '') + '</p>';
+
+  if (mode === 'login') {
+    authShell('login',
+      '<h2>Welcome back</h2><p class="muted">Log in and keep climbing the board.</p>' + msg +
+      '<div id="f">' + field('Email', 'envelope', 'email', 'email', 'email') + field('Password', 'lock', 'pw', 'password', 'current-password') +
+      '<button class="btn block" type="button" data-submit="1">' + ic('right-to-bracket') + 'Log in</button></div>' +
+      '<div class="alt-actions"><button class="btn ghost block" type="button" data-auth="forgot">' + ic('key') + 'Forgot password?</button></div>');
+    onSubmit = async () => {
+      const email = val('email').trim();
+      if (!email || !val('pw')) return setMsg('Enter your email and password.');
+      busy(true);
+      const { error } = await sb.auth.signInWithPassword({ email, password: val('pw') });
+      if (error) { busy(false); return setMsg(friendly(error)); }
+      await enter();
+    };
+  }
+
+  if (mode === 'signup') {
+    authShell('signup',
+      '<h2>Create your account</h2><p class="muted">Free, and takes under a minute.</p>' + msg +
+      '<div id="f">' + field('Username (at least 3 characters)', 'user', 'username', 'text', 'username') +
+      field('Email', 'envelope', 'email', 'email', 'email') +
+      field('Password (6 characters or more)', 'lock', 'pw', 'password', 'new-password') +
+      field('Confirm password', 'shield-halved', 'pw2', 'password', 'new-password') +
+      '<button class="btn block" type="button" data-submit="1">' + ic('user-plus') + 'Create account</button></div>');
+    onSubmit = async () => {
+      const username = val('username').trim();
+      const email = val('email').trim();
+      if (username.length < 3) return setMsg('Username must be at least 3 characters.');
+      if (!/^\S+@\S+\.\S+$/.test(email)) return setMsg('Enter a valid email address.');
+      if (val('pw').length < 6) return setMsg('Password must be at least 6 characters.');
+      if (val('pw') !== val('pw2')) return setMsg('Passwords do not match.');
+      busy(true);
+      const chk = await sb.rpc('username_taken', { p_username: username });
+      if (chk.error) { busy(false); return setMsg(friendly(chk.error)); }
+      if (chk.data) { busy(false); return setMsg('That username is taken. Pick another one.'); }
+      const { data, error } = await sb.auth.signUp({
+        email, password: val('pw'),
+        options: { data: { username }, emailRedirectTo: location.origin + location.pathname }
+      });
+      if (error) { busy(false); return setMsg(friendly(error)); }
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        busy(false);
+        return setMsg('That email already has an account. Log in instead.');
+      }
+      if (data.session) return enter();
+      renderAuth('login', { ok: true, t: 'Account created. Check your email to confirm it, then log in.' });
+    };
+  }
+
+  if (mode === 'forgot') {
+    authShell('',
+      '<h2>Forgot password</h2><p class="muted">Enter your email and we will send you a reset link.</p>' + msg +
+      '<div id="f" style="margin-top:16px">' + field('Email', 'envelope', 'email', 'email', 'email') +
+      '<button class="btn block" type="button" data-submit="1">' + ic('paper-plane') + 'Send reset link</button></div>' +
+      '<div class="alt-actions"><button class="btn ghost block" type="button" data-auth="login">' + ic('arrow-left') + 'Back to log in</button></div>');
+    onSubmit = async () => {
+      const email = val('email').trim();
+      if (!/^\S+@\S+\.\S+$/.test(email)) return setMsg('Enter a valid email address.');
+      if (location.protocol === 'file:') return setMsg('Reset links only work once the site is hosted online.');
+      busy(true);
+      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+      busy(false);
+      if (error) return setMsg(friendly(error));
+      setMsg('If an account uses that email, a reset link is on its way. Open it on this device.', true);
+    };
+  }
+}
+
+function renderRecovery() {
+  clearInterval(timerId);
+  renderNav('');
+  authShell('',
+    '<h2>Set a new password</h2><p class="muted">Choose a new password for your account.</p><p id="msg" class="msg err" role="alert"></p>' +
+    '<div id="f">' + field('New password (6 characters or more)', 'lock', 'pw', 'password', 'new-password') +
+    field('Confirm new password', 'shield-halved', 'pw2', 'password', 'new-password') +
+    '<button class="btn block" type="button" data-submit="1">' + ic('floppy-disk') + 'Save new password</button></div>');
+  onSubmit = async () => {
+    if (val('pw').length < 6) return setMsg('Password must be at least 6 characters.');
+    if (val('pw') !== val('pw2')) return setMsg('Passwords do not match.');
+    busy(true);
+    const { error } = await sb.auth.updateUser({ password: val('pw') });
+    if (error) { busy(false); return setMsg(friendly(error)); }
+    recovering = false;
+    history.replaceState(null, '', location.pathname + location.search);
+    await enter();
+  };
+}
+
+/* After a successful login: load the profile, send any unsent scores, open the app.
+   Offline, the last signed-in player can keep playing; scores upload when the internet is back. */
+function startOffline(c) {
+  uid = c.uid;
+  user = c.username;
+  route();
+}
+
+async function enter() {
+  let session = null;
+  if (sb) {
+    try { const r = await sb.auth.getSession(); session = r && r.data ? r.data.session : null; } catch (e) {}
+  }
+  if (!session) {
+    const c = db.get('br_last', null);
+    if (c && !navigator.onLine) return startOffline(c);
+    user = null; uid = null;
+    return renderAuth('login', navigator.onLine ? undefined : { t: "You're offline. Log in once with internet, then you can play offline." });
+  }
+  uid = session.user.id;
+  let name = null;
+  try {
+    const { data } = await sb.from('profiles').select('username').eq('id', uid).maybeSingle();
+    if (data) name = data.username;
+  } catch (e) {}
+  if (!name) {
+    const c = db.get('br_last', null);
+    if (c && c.uid === uid) name = c.username;
+  }
+  if (!name) {
+    user = null;
+    renderNav('');
+    app.innerHTML = '<div class="card narrow-card"><h2>' + ic('triangle-exclamation') + ' Could not load your profile</h2><p class="muted" style="margin:10px 0 16px">Check your connection and try again. If it keeps happening, make sure the SQL setup was run in Supabase.</p>' +
+      '<div class="actions"><button class="btn" data-retry="1">' + ic('rotate-right') + 'Try again</button><button class="btn ghost" data-go="logout">' + ic('right-from-bracket') + 'Log out</button></div></div>';
+    return;
+  }
+  user = name;
+  db.set('br_last', { uid, username: name });
+  flushPending();
+  route();
+}
+
+/* ---------- Scores and leaderboard (stored online) ---------- */
+async function lb(level, limit) {
+  if (!sb || !navigator.onLine) throw new Error('offline');
+  const { data, error } = await sb.rpc('leaderboard', { p_level: level, p_limit: limit || 20 });
+  if (error) throw error;
+  return data || [];
+}
+
+async function saveScore(row) {
+  try {
+    const { error } = await sb.from('scores').insert(row);
+    if (!error) return true;
+  } catch (e) {}
+  const key = 'br_pending_' + uid;
+  const list = db.get(key, []);
+  list.push(row);
+  db.set(key, list);
+  return false;
+}
+
+async function flushPending() {
+  const key = 'br_pending_' + uid;
+  const list = db.get(key, []);
+  if (!list.length || !sb) return;
+  const keep = [];
+  for (let i = 0; i < list.length; i++) {
+    try {
+      const { error } = await sb.from('scores').insert(list[i]);
+      if (error && error.code !== '23514') { keep.push(...list.slice(i)); break; } // keep on network errors, drop rows the server rejects
+    } catch (e) { keep.push(...list.slice(i)); break; }
+  }
+  if (keep.length) db.set(key, keep); else db.del(key);
+}
+
+/* ---------- Home ---------- */
+function renderHome() {
+  clearInterval(timerId);
+  renderNav('home');
+  const active = db.get('br_quiz_' + uid, null);
+  const last = db.get('br_result_' + uid, null);
+  const DESC = {
+    easy: 'Simple general knowledge to warm up.',
+    medium: 'Science, history, geography and more.',
+    advanced: 'Tougher questions in science, history, maths and tech.'
+  };
+
+  let html = '<div class="page-head split rise"><div><h1>Ready to rush, ' + esc(user) + '?</h1>' +
+    '<p class="muted">Pick a level. Each quiz has ' + TOTAL + ' questions and a 20 minute timer, shuffled every time you play.</p></div>' +
+    '<ul class="chips"><li class="chip"><span class="ico">' + ic('coins') + '</span><div><strong id="h-total">...</strong><span class="t">total points</span></div></li>' +
+    '<li class="chip"><span class="ico fire">' + ic('fire') + '</span><div><strong id="h-streak">...</strong><span class="t">day streak</span></div></li></ul></div>' +
+    '<p id="h-err" class="msg err" role="alert"></p>';
+
+  if (active) {
+    html += '<div class="card notice rise"><div><h2>' + ic('hourglass-half') + ' Quiz in progress</h2><p>' + LABEL[active.level] + ' level. The timer is still running.</p></div>' +
+      '<div class="actions"><button class="btn" data-resume="1">' + ic('play') + 'Resume quiz</button>' +
+      '<button class="btn alt" data-discard="1">' + ic('trash') + 'Discard</button></div></div>';
+  }
+
+  html += '<div class="cards">' + LEVELS.map((l, n) => {
+    const meter = '<span class="meter" role="img" aria-label="Difficulty ' + (n + 1) + ' of 3">' +
+      [1, 2, 3].map(k => '<i' + (k <= n + 1 ? ' class="on"' : '') + '></i>').join('') + '</span>';
+    return '<div class="card level-card rise" style="--i:' + (n + 1) + '"><div class="level-top"><span class="ico">' + ic(LVL_ICON[l]) + '</span><h2>' + LABEL[l] + '</h2>' + meter + '</div>' +
+      '<p class="desc">' + DESC[l] + '</p>' +
+      '<dl class="facts"><dt>' + ic('circle-question') + 'Questions</dt><dd>' + TOTAL + '</dd><dt>' + ic('clock') + 'Time</dt><dd>20 minutes</dd>' +
+      '<dt>' + ic('gem') + 'Reward</dt><dd>' + PER[l] + ' pts per answer</dd>' +
+      '<dt>' + ic('crown') + 'Leader</dt><dd id="lead-' + l + '">...</dd>' +
+      '<dt>' + ic('star') + 'Your points</dt><dd id="mine-' + l + '">...</dd></dl>' +
+      '<button class="btn block" data-start="' + l + '"' + (active ? ' disabled' : '') + '>' + ic('play') + 'Start ' + LABEL[l] + '</button></div>';
+  }).join('') + '</div>' +
+  '<p class="tip">' + ic('bolt') + 'Finish faster and earn a speed bonus of up to 100 points, scaled by how many answers you got right.</p><div id="install-slot"></div>';
+
+  if (last) html += '<div class="actions" style="margin-top:20px"><button class="btn alt" data-result="1">' + ic('clock-rotate-left') + 'View last result (' + LABEL[last.level] + ', ' + last.points + ' pts)</button></div>';
+  app.innerHTML = html;
+  fillInstall();
+  loadHome();
+}
+
+async function loadHome() {
+  try {
+    const all = await Promise.all([lb(null, 1000)].concat(LEVELS.map(l => lb(l, 1000))));
+    const me = all[0].find(x => x.username === user);
+    setText('h-total', me ? me.total_points : 0);
+    setText('h-streak', me ? me.streak : 0);
+    LEVELS.forEach((l, i) => {
+      const rows = all[i + 1];
+      const mine = rows.find(x => x.username === user);
+      setText('lead-' + l, rows[0] ? rows[0].username + ' (' + rows[0].total_points + ')' : 'No scores yet');
+      setText('mine-' + l, mine ? mine.total_points + ' pts' : 'Not played');
+    });
+  } catch (e) {
+    setText('h-err', navigator.onLine ? 'Could not load the leaderboard. Check your connection and refresh.' : "You're offline. You can still play. Connect to the internet to see the leaderboard.");
+    ['h-total', 'h-streak'].forEach(id => setText(id, '-'));
+    LEVELS.forEach(l => { setText('lead-' + l, '-'); setText('mine-' + l, '-'); });
+  }
+}
+
+/* ---------- Quiz ---------- */
+function startQuiz(level) {
+  const qs = shuffle(BANK[level]).map(r => ({ q: r[0], opts: shuffle(r.slice(1)), correct: r[1] }));
+  const now = Date.now();
+  Q = { level, qs, answers: Array(TOTAL).fill(null), cur: 0, start: now, end: now + LIMIT * 1000 };
+  saveQ();
+  renderQuiz();
+}
+
+function saveQ() { if (Q && uid) db.set('br_quiz_' + uid, Q); }
+
+function tick() {
+  if (!Q) { clearInterval(timerId); return; }
+  const left = Math.max(0, Math.ceil((Q.end - Date.now()) / 1000));
+  const t = document.getElementById('timer');
+  if (t) {
+    t.textContent = fmt(left);
+    t.parentElement.classList.toggle('low', left <= 60);
+  }
+  if (left <= 0) finish(true);
+}
+
+function renderQuiz() {
+  renderNav('');
+  Q = db.get('br_quiz_' + uid, null);
+  if (!Q) return renderHome();
+  const i = Q.cur, item = Q.qs[i];
+  const answered = Q.answers.filter(a => a !== null).length;
+  const pct = Math.round((i + 1) / TOTAL * 100);
+
+  app.innerHTML =
+    '<div class="quiz-head"><span class="pill">' + ic(LVL_ICON[Q.level]) + LABEL[Q.level] + ' level</span><span class="timerbox">' + ic('stopwatch') + '<span id="timer" aria-live="off"></span></span></div>' +
+    '<div class="progress" role="progressbar" aria-label="Quiz progress" aria-valuemin="1" aria-valuemax="' + TOTAL + '" aria-valuenow="' + (i + 1) + '"><div class="fill" style="width:' + pct + '%"></div></div>' +
+    '<div class="progress-text"><span>Question ' + (i + 1) + ' of ' + TOTAL + '</span><span>' + ic('circle-check') + ' ' + answered + ' answered</span></div>' +
+    '<div class="card"><h2 class="q">' + (i + 1) + '. ' + esc(item.q) + '</h2>' +
+      item.opts.map((o, k) => '<button class="opt' + (Q.answers[i] === k ? ' sel' : '') + '" data-opt="' + k + '"><span class="key">' +
+        String.fromCharCode(65 + k) + '</span><span class="txt">' + esc(o) + '</span>' + '<i class="fa-solid fa-circle-check tick" aria-hidden="true"></i>' + '</button>').join('') + '</div>' +
+    '<div class="quiz-actions"><button class="btn alt" data-act="prev"' + (i === 0 ? ' disabled' : '') + '>' + ic('arrow-left') + 'Previous</button>' +
+      '<button class="btn alt" data-act="next"' + (i === TOTAL - 1 ? ' disabled' : '') + '>Next' + ic('arrow-right') + '</button>' +
+      '<span class="spacer"></span><button class="btn" data-act="submit">' + ic('paper-plane') + 'Submit</button></div>' +
+    '<div class="card"><h3>' + ic('grip') + ' Jump to a question</h3><div class="grid">' +
+      Q.qs.map((_, k) => '<button class="' + (k === i ? 'cur' : (Q.answers[k] !== null ? 'done' : '')) + '" data-q="' + k + '">' + (k + 1) + '</button>').join('') + '</div></div>';
+
+  clearInterval(timerId);
+  timerId = setInterval(tick, 1000);
+  tick();
+}
+
+function setSave(text, ok) {
+  const m = document.getElementById('savemsg');
+  if (!m) return;
+  m.textContent = text;
+  m.className = 'msg ' + (ok ? 'ok' : 'err');
+}
+
+async function finish(auto) {
+  clearInterval(timerId);
+  const dl = document.getElementById('dlg');
+  if (dl) dl.remove();
+  if (!Q) return;
+  const s = Q;
+  Q = null;                       // stops a second submit
+  db.del('br_quiz_' + uid);
+  const score = s.qs.reduce((n, q, i) => n + (s.answers[i] !== null && q.opts[s.answers[i]] === q.correct ? 1 : 0), 0);
+  const time = Math.max(1, Math.min(LIMIT, Math.round((Math.min(Date.now(), s.end) - s.start) / 1000)));
+  const base = score * PER[s.level];
+  const bonus = Math.round((LIMIT - time) / LIMIT * 100 * score / TOTAL);
+  const points = base + bonus;
+  const result = {
+    level: s.level, score, total: TOTAL, time, points, base, bonus, per: PER[s.level],
+    auto: !!auto, date: new Date().toLocaleDateString(),
+    review: s.qs.map((q, i) => ({ q: q.q, correct: q.correct, chosen: s.answers[i] === null ? null : q.opts[s.answers[i]] }))
+  };
+  db.set('br_result_' + uid, result);
+  renderResult(result, true);
+  setSave('Saving your score...', true);
+  const ok = await saveScore({ level: s.level, correct: score, total: TOTAL, points, time_seconds: time, play_day: localDay() });
+  setSave(ok ? 'Your score was saved to the leaderboard.' : 'Could not save your score right now. It will be sent the next time you open the site online.', ok);
+  loadRank(s.level);
+}
+
+/* ---------- Results ---------- */
+async function loadRank(level) {
+  try {
+    const rows = await lb(level, 1000);
+    const i = rows.findIndex(x => x.username === user);
+    setText('rank', i >= 0 ? '#' + (i + 1) : '-');
+  } catch (e) { setText('rank', '-'); }
+}
+
+function countUp(id, to) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (reduceMotion() || to === 0) { el.textContent = to; return; }
+  const t0 = performance.now(), dur = 800;
+  const step = now => {
+    const k = Math.min(1, (now - t0) / dur);
+    el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3)));
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+function confetti() {
+  if (reduceMotion()) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'confetti';
+  wrap.setAttribute('aria-hidden', 'true');
+  const cols = ['#22c55e', '#a3e635', '#facc15', '#4ade80', '#86efac'];
+  for (let i = 0; i < 44; i++) {
+    const p = document.createElement('i');
+    p.className = 'fa-solid ' + (i % 3 === 0 ? 'fa-star' : 'fa-circle') + ' conf';
+    p.style.left = rnd(100) + 'vw';
+    p.style.color = cols[rnd(cols.length)];
+    p.style.fontSize = (8 + rnd(12)) + 'px';
+    p.style.animationDelay = (rnd(70) / 100) + 's';
+    wrap.appendChild(p);
+  }
+  document.body.appendChild(wrap);
+  setTimeout(() => wrap.remove(), 3400);
+}
+
+function renderResult(r, fresh) {
+  clearInterval(timerId);
+  renderNav('');
+  const pct = Math.round(r.score / r.total * 100);
+  const note = pct >= 80 ? 'Excellent work!' : pct >= 50 ? 'Good effort. Try again to beat your score.' : 'Keep practicing. You can retry this level anytime.';
+  const headIcon = pct >= 80 ? 'trophy' : pct >= 50 ? 'thumbs-up' : 'dumbbell';
+  const breakdown = r.score + ' correct × ' + r.per + ' points = ' + (r.score * r.per) + ', plus ' + r.bonus + ' speed bonus';
+  const stat = (icon, big, small, id) => '<div><span class="ico">' + ic(icon) + '</span><div><strong' + (id ? ' id="' + id + '"' : '') + '>' + big + '</strong><span class="t">' + small + '</span></div></div>';
+
+  app.innerHTML =
+    (r.auto ? '<p class="msg err">Time is up. Your quiz was submitted automatically.</p>' : '') +
+    '<p id="savemsg" class="msg ok" role="status"></p>' +
+    '<div class="card rise"><div class="result-head"><h1>' + ic(headIcon) + ' Your results</h1><span class="pill">' + ic(LVL_ICON[r.level]) + LABEL[r.level] + ' level</span></div>' +
+    '<p class="score">' + ic('coins') + '<span id="score-num">' + r.points + '</span><small>points</small></p><p class="muted">' + breakdown + '. ' + note + '</p>' +
+    '<div class="statrow">' + stat('bullseye', r.score + ' / ' + r.total, 'correct (' + pct + '%)') +
+      stat('hourglass-half', fmtLong(r.time), 'time taken') + stat('ranking-star', '...', 'your rank on ' + LABEL[r.level], 'rank') + '</div>' +
+    '<div class="actions"><button class="btn" data-start="' + r.level + '">' + ic('rotate-right') + 'Retry ' + LABEL[r.level] + '</button>' +
+    '<button class="btn alt" data-board="' + r.level + '">' + ic('trophy') + 'Leaderboard</button>' +
+    '<button class="btn ghost" data-go="home">' + ic('house') + 'Home</button></div></div>' +
+    '<div class="card" style="margin-top:16px"><h2 style="margin-bottom:6px">' + ic('list-check') + ' Review your answers</h2>' +
+    r.review.map((x, i) => {
+      const ok = x.chosen === x.correct;
+      return '<div class="rev ' + (ok ? 'ok' : 'no') + '"><strong>' + (i + 1) + '. ' + esc(x.q) + '</strong>' +
+        (ok ? '<span class="good">' + ic('circle-check') + ' Your answer: ' + esc(x.chosen) + '</span>'
+            : '<span class="bad">' + ic(x.chosen === null ? 'circle-minus' : 'circle-xmark') + ' Your answer: ' + (x.chosen === null ? 'not answered' : esc(x.chosen)) + '</span><br><span class="good">' + ic('circle-check') + ' Correct answer: ' + esc(x.correct) + '</span>') +
+        '</div>';
+    }).join('') + '</div>';
+  loadRank(r.level);
+  if (fresh) {
+    countUp('score-num', r.points);
+    if (pct >= 60) confetti();
+  }
+}
+
+/* ---------- Leaderboard ---------- */
+async function renderBoard(level) {
+  clearInterval(timerId);
+  renderNav('board');
+  const token = ++boardToken;
+  const tabs = LEVELS.concat('overall');
+  const tabName = l => l === 'overall' ? 'Overall' : LABEL[l];
+  const tabIcon = l => l === 'overall' ? 'globe' : LVL_ICON[l];
+
+  app.innerHTML = '<div class="page-head rise"><h1>' + ic('trophy') + ' Leaderboard</h1>' +
+    '<p class="muted">' + (level === 'overall' ? 'Total points across all levels.' : 'Total points earned on ' + LABEL[level] + '.') +
+    ' Streak is how many days in a row a player has finished a quiz.</p></div>' +
+    '<div class="row-tabs"><div class="tabs">' + tabs.map(l => '<button class="seg-btn' + (l === level ? ' on' : '') + '" data-board="' + l + '">' + ic(tabIcon(l)) + '<span class="lbl2">' + tabName(l) + '</span></button>').join('') + '</div>' +
+    '<button class="btn ghost sm" data-board="' + level + '">' + ic('rotate') + 'Refresh</button></div>' +
+    '<div class="card" id="lb-body"><p class="empty"><i class="fa-solid fa-spinner fa-spin"></i>Loading...</p></div>';
+
+  let body;
+  try {
+    const rows = await lb(level === 'overall' ? null : level, 20);
+    if (token !== boardToken) return;
+    body = rows.length
+      ? '<div class="tablewrap"><table><thead><tr><th>Rank</th><th>Player</th><th>Total points</th><th>Streak</th></tr></thead><tbody>' +
+        rows.map((b, i) => '<tr' + (b.username === user ? ' class="me"' : '') + '><td><span class="rank r' + (i + 1) + '" aria-label="Rank ' + (i + 1) + '">' + (i < 3 ? ic('medal') : (i + 1)) + '</span></td>' +
+          '<td class="name">' + esc(b.username) + '</td><td>' + ic('coins') + ' ' + b.total_points + '</td>' +
+          '<td><span class="streak' + (b.streak ? '' : ' off') + '">' + ic('fire') + b.streak + (b.streak === 1 ? ' day' : ' days') + '</span></td></tr>').join('') +
+        '</tbody></table></div>'
+      : '<p class="empty">' + ic('ghost') + 'No points yet' + (level === 'overall' ? '' : ' on ' + LABEL[level]) + '. Finish a quiz to get on the board.</p>';
+  } catch (e) {
+    if (token !== boardToken) return;
+    body = navigator.onLine
+      ? '<p class="empty">' + ic('plug-circle-exclamation') + 'Could not load the leaderboard. Check your connection and press Refresh.</p>'
+      : '<p class="empty">' + ic('plug-circle-xmark') + "You're offline. Connect to the internet to see the leaderboard." + '</p>';
+  }
+  const el = document.getElementById('lb-body');
+  if (el) el.innerHTML = body;
+}
+
+/* ---------- In-page confirm ---------- */
+function ask(text, yes) {
+  pendingYes = yes;
+  const old = document.getElementById('dlg');
+  if (old) old.remove();
+  const d = document.createElement('div');
+  d.id = 'dlg';
+  d.innerHTML = '<div class="dlgbox" role="alertdialog"><span class="ico">' + ic('circle-question') + '</span><p>' + esc(text) + '</p>' +
+    '<div class="actions"><button class="btn alt" data-dlg="no">Cancel</button><button class="btn" data-dlg="yes">' + ic('check') + 'Yes</button></div></div>';
+  document.body.appendChild(d);
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('button[data-dlg]');
+  if (!b) return;
+  const yes = pendingYes;
+  pendingYes = null;
+  const d = document.getElementById('dlg');
+  if (d) d.remove();
+  if (b.dataset.dlg === 'yes' && yes) yes();
+});
+
+/* ---------- Click handling ---------- */
+app.addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  const d = b.dataset;
+
+  if (d.submit) { if (onSubmit && document.getElementById('f')) onSubmit(); return; }
+  if (d.auth) return renderAuth(d.auth);
+  if (d.install) {
+    if (installEvt) { installEvt.prompt(); installEvt.userChoice.finally(() => { installEvt = null; fillInstall(); }); }
+    return;
+  }
+  if (d.retry) return enter();
+  if (d.go === 'home') return renderHome();
+  if (d.go === 'logout') return doLogout();
+  if (d.board) return renderBoard(d.board);
+  if (d.start) return startQuiz(d.start);
+  if (d.resume) return renderQuiz();
+  if (d.discard) {
+    ask('Discard this quiz? Your answers will be lost.', () => {
+      db.del('br_quiz_' + uid); Q = null; renderHome();
+    });
+    return;
+  }
+  if (d.result) {
+    const r = db.get('br_result_' + uid, null);
+    if (r) renderResult(r, false);
+    return;
+  }
+
+  if (!Q) return;
+  if (d.opt !== undefined) { Q.answers[Q.cur] = Number(d.opt); saveQ(); return renderQuiz(); }
+  if (d.q !== undefined) { Q.cur = Number(d.q); saveQ(); return renderQuiz(); }
+  if (d.act === 'prev' && Q.cur > 0) { Q.cur--; saveQ(); return renderQuiz(); }
+  if (d.act === 'next' && Q.cur < TOTAL - 1) { Q.cur++; saveQ(); return renderQuiz(); }
+  if (d.act === 'submit') {
+    const left = Q.answers.filter(a => a === null).length;
+    const text = left ? 'You have ' + left + ' unanswered question' + (left > 1 ? 's' : '') + '. Submit anyway?' : 'Submit your answers now?';
+    ask(text, () => finish(false));
+  }
+});
+
+app.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.closest('#f') && onSubmit) {
+    e.preventDefault();
+    onSubmit();
+  }
+});
+
+/* ---------- Start ---------- */
+/* Some previews cannot copy Headers objects or abort signals between frames, so turn them into plain data first */
+function safeFetch(url, opts) {
+  const o = Object.assign({}, opts || {});
+  if (o.headers && typeof o.headers.forEach === 'function' && !Array.isArray(o.headers)) {
+    const h = {};
+    o.headers.forEach((v, k) => { h[k] = v; });
+    o.headers = h;
+  }
+  delete o.signal;
+  return fetch(typeof url === 'string' ? url : String(url.url || url), o);
+}
+
+async function init() {
+  renderNav();
+  updateNet();
+  if (typeof supabase === 'undefined') {
+    const c = db.get('br_last', null);
+    if (c) return startOffline(c);
+    return renderSetup('The Supabase library did not load. Check your internet connection and refresh.');
+  }
+  if (SUPABASE_URL.includes('PASTE') || SUPABASE_KEY.includes('PASTE')) return renderSetup('');
+
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    global: { fetch: safeFetch },
+    auth: { flowType: 'implicit', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  });
+
+  /* The reset-password email link brings the person back here with a recovery token in the address */
+  if (/error_code=|error_description=/.test(location.hash)) {
+    history.replaceState(null, '', location.pathname + location.search);
+    return renderAuth('login', { t: 'That link is invalid or has expired. Request a new reset link.' });
+  }
+  if (/type=recovery/.test(location.hash)) recovering = true;
+  sb.auth.onAuthStateChange(event => {
+    if (event === 'PASSWORD_RECOVERY') { recovering = true; setTimeout(renderRecovery, 0); }
+  });
+  if (recovering) {
+    setTimeout(() => { if (recovering && !document.getElementById('f')) renderRecovery(); }, 1000);
+    return;
+  }
+  await enter();
+}
+
+/* ---------- Offline bar ---------- */
+let netTimer = null;
+function updateNet(fromEvent) {
+  const bar = document.getElementById('netbar');
+  if (!bar) return;
+  clearTimeout(netTimer);
+  if (!navigator.onLine) {
+    bar.innerHTML = ic('plug-circle-xmark') + "You're offline. You can still play. Scores upload when you're back online.";
+    bar.hidden = false;
+  } else if (fromEvent) {
+    bar.innerHTML = ic('wifi') + 'Back online.';
+    bar.hidden = false;
+    netTimer = setTimeout(() => { bar.hidden = true; }, 2500);
+  } else {
+    bar.hidden = true;
+  }
+}
+window.addEventListener('offline', () => updateNet(true));
+window.addEventListener('online', async () => {
+  updateNet(true);
+  if (sb && uid) { try { await sb.auth.getSession(); } catch (e) {} flushPending(); }
+});
+
+/* ---------- Install as an app ---------- */
+let installEvt = null;
+const standalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+function fillInstall() {
+  const slot = document.getElementById('install-slot');
+  if (!slot) return;
+  if (standalone() || !('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) { slot.innerHTML = ''; return; }
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  slot.innerHTML = '<div class="card install rise"><span class="ico">' + ic('mobile-screen-button') + '</span><div><h3>Get the app</h3><p class="muted">' +
+    (installEvt ? 'Install Brain Rush to play offline. The leaderboard still needs internet.'
+      : ios ? 'On iPhone: tap the Share button, then Add to Home Screen. After that you can play offline.'
+      : 'Open your browser menu and choose Install app or Add to Home screen. After that you can play offline.') + '</p></div>' +
+    (installEvt ? '<button class="btn" data-install="1">' + ic('download') + 'Install</button>' : '') + '</div>';
+}
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; fillInstall(); });
+window.addEventListener('appinstalled', () => { installEvt = null; fillInstall(); });
+
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
+
+init();
+</script>
+</body>
+</html>
